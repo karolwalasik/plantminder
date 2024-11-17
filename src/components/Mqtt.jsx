@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import mqtt from 'mqtt';
+import Switch from '@mui/material/Switch';
 
 const MQTTComponent = () => {
   // Stan do przechowywania danych MQTT
@@ -51,11 +52,12 @@ const MQTTComponent = () => {
 
   return (
     <div>
+      <Switch color="primary"/>
       <h1>MQTT Data</h1>
       {data ? (
         <pre>{JSON.stringify(data, null, 2)}</pre>
       ) : (
-        <p>Waiting for data...</p>
+        <p style={{fontFamily:'k2d', fontWeight: '500'}}>Waiting for data...</p>
       )}
     </div>
   );

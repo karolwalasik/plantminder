@@ -1,9 +1,9 @@
-import MQTTComponent from './Mqtt';
+import Router from "./components/Router"
 
 function App() {
   return (
     <div className="App">
-        <MQTTComponent/>
+      <Router/>
     </div>
   );
 }
