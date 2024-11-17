@@ -1,11 +1,9 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { Link } from 'react-router-dom';
 
 const ErrorPage = () => {
-  const handleBackToHome = () => {
-    window.location.href = '/'; // Redirect to the home page
-  };
 
   return (
     <Box
@@ -31,8 +29,9 @@ const ErrorPage = () => {
       <Button
         variant="contained"
         color="primary"
-        onClick={handleBackToHome}
         sx={{ textTransform: 'none' }}
+        component={Link}
+        to="/"
       >
         Back to Home
       </Button>
