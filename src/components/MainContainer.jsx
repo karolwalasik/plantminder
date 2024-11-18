@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import '../assets/fonts.js'
 import { COLORS } from '../constants/COLORS.js'
+import { Container } from "@mui/material";
 
 const StyledContainer = styled.div`
     height:100%;
@@ -9,5 +10,10 @@ const StyledContainer = styled.div`
 `
 
 export const MainContainer = ({children}) => {
-    return <StyledContainer className="main-container">{children}</StyledContainer>
+    return <StyledContainer className="main-container">
+        
+        <Container maxWidth={{xs: 'sm',sm: 'md'}} disableGutters>
+            {children}
+        </Container>
+        </StyledContainer>
 }

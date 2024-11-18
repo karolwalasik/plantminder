@@ -50,6 +50,9 @@ export const theme = createTheme({
     p:{
       fontSize: "2.4rem"
     },
+    p2:{
+      fontSize: "2rem"
+    },
     h1: {
       fontSize: "4.8rem",
     },

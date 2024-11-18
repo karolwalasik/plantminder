@@ -6,21 +6,19 @@ import reportWebVitals from './reportWebVitals';
 import {theme} from "./theme";
 import {ThemeProvider} from "@mui/material";
 import { MainContainer } from './components/MainContainer';
-
-
+import { BrowserRouter } from 'react-router-dom'; // Add this import
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-     <ThemeProvider theme={theme}>
-      <MainContainer>
-        <App />
-      </MainContainer>
-     </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <MainContainer>
+          <App />
+        </MainContainer>
+      </ThemeProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

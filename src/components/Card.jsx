@@ -7,15 +7,15 @@ const Wrapper = styled.div`
     color: white;
     padding:20px;
     border-radius: 12px;
-    width:400px;
-    height: 240px; 
+    width:360px;
+    height: 220px; 
     display:flex;
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
     background: ${(props) => props.$bg || COLORS.PRIMARY};
 
     ${(props) => props.theme.breakpoints.down("sm")} {
-        width: 320px;
-        height: 180px;
+        width: 280px;
+        height: 160px;
     }
 `
 
@@ -25,12 +25,12 @@ const IconSection = styled.div`
     align-items:center;
     justify-content: center;
     > svg {
-        width: 90px;
+        width: 70px;
         height:100%;
-        max-height: 180px;
+        max-height: 160px;
         ${(props) => props.theme.breakpoints.down("sm")} {
-            width: 60px
-            max-height:120px;
+            width: 50px;
+            max-height:100px;
         }
         
         >path {
@@ -65,8 +65,8 @@ const Card = ({icon: Icon, value, valueName, bg}) => {
                 {Icon && <Icon />}
             </IconSection>
             <ValueSection>
-                <Value sx={{fontSize: {xs: '6.4rem',sm: '8rem'}}} fontWeight={600}>{value}</Value>
-                <ValueName sx={{fontSize: {xs: '2rem',sm: '2.4rem'}}}>{valueName}</ValueName>
+                <Value sx={{fontSize: {xs: '4.8rem',sm: '8rem'}}} fontWeight={600}>{value}</Value>
+                <ValueName sx={{fontSize: {xs: '1.6rem',sm: '2.4rem'}}}>{valueName}</ValueName>
             </ValueSection>
         </Wrapper>
     )

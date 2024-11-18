@@ -1,24 +1,14 @@
-import {
-    createBrowserRouter,
-    RouterProvider,
-  } from "react-router-dom";
-  import Root from "../pages/Root";
-  import Weather from "../pages/Weather";
-  import ErrorPage from "../pages/ErrorPage";
+import { Routes, Route } from "react-router-dom";
+import Root from "../pages/Root";
+import Weather from "../pages/Weather";
+import ErrorPage from "../pages/ErrorPage";
 
-  
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <Root/>,
-      errorElement: <ErrorPage />,
-    },
-    {
-        path: "/weather",
-        element: <Weather/>
-    }
-  ]);
-
-export default function Router () {
-    return <RouterProvider router={router} /> 
+export default function Router() {
+  return (
+    <Routes>
+      <Route path="/" element={<Root />} errorElement={<ErrorPage />} />
+      <Route path="/weather" element={<Weather />} />
+      <Route path="*" element={<ErrorPage />} />
+    </Routes>
+  )
 }

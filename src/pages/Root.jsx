@@ -1,13 +1,52 @@
-import { Typography } from "@mui/material";
-import Card from '../components/Card'
+import { Container } from "@mui/material";
+import styled from "styled-components";
+import { useState, useEffect } from 'react';
+import AutomationLogs from '../components/AutomationLogs';
+import CardsGrid from '../components/CardsGrid';
+import Controls from '../components/Controls';
+import { mockData } from '../helpers/mockData';
+import Loader from '../components/Loader';
 
-import { ReactComponent as Icon2 } from '../assets/Temperature.svg';
+const DashboardWrapper = styled(Container)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "flex-start",
+  gap: '32px',
+  paddingTop: '32px',
+  paddingBottom: '64px',
+}));
+
 export default function Root() {
-    return (
-        <div>
-<Typography component={'h1'} variant="h1">ROOT PAGE</Typography>
-            <Card icon={Icon2} value={'22'} valueName={'temperature'} bg={"linear-gradient(180deg, #C03221 0%, #FCAB10 100%)"}/>
-        </div>
-      
-    );
+  const [logs] = useState(mockData.logs);
+  const [sensors] = useState(mockData.sensors);
+  const [controls, setControls] = useState(mockData.controls);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleControlChange = (name, state) => {
+    setControls(controls.map(control => 
+      control.name === name ? { ...control, state } : control
+    ));
+  };
+
+  if (isLoading) {
+    return <Loader />;
   }
+
+  return (
+    <DashboardWrapper>
+      <AutomationLogs logs={logs} />
+      <CardsGrid sensors={sensors} />
+      <Controls controls={controls} onControlChange={handleControlChange} />
+    </DashboardWrapper>
+  );
+}
