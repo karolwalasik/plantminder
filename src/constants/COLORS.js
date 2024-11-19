@@ -16,3 +16,10 @@ export const COLORS = {
     PINK: '#FF9FB2'
 }
 
+export const GRADIENTS = {
+    ORANGE: "linear-gradient(180deg, #C03221 0%, #FCAB10 100%)",
+    BLUE: "linear-gradient(180deg, #145C9E 0%, #87F6FF 100%)",
+    PURPLE: "linear-gradient(180deg, #731DD8 0%, #FF9FB2 100%)",
+    BLUEGREEN: "linear-gradient(180deg, #00BFFF 0%, #228B22 100%)"
+}
+

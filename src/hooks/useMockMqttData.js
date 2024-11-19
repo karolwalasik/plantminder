@@ -16,7 +16,7 @@ export const useMockMqttData = () => {
 
     setClient(mqttClient);
 
-    mqttClient.on('connect', () => {
+    mqttClient.on('connect', () => { 
       console.log('Connected to mock MQTT broker');
       setIsConnected(true);
       
