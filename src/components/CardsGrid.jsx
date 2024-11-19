@@ -11,6 +11,7 @@ const CardsGrid = ({ sensors }) => {
             icon={getIconByValueName(sensor.valueName)}
             value={sensor.value}
             valueName={sensor.valueName}
+            unit={sensor.unit}
             bg={
               index % 2 === 0
                 ? "linear-gradient(180deg, #C03221 0%, #FCAB10 100%)"

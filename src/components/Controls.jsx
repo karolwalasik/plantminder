@@ -22,7 +22,7 @@ const Controls = ({ controls, onControlChange }) => {
     <ControlsWrapper theme={theme}>
       {controls.map((control, index) => (
         <Box
-          key={index}
+          key={control.id}
           sx={{
             display: "flex",
             borderRadius: '20px',
@@ -36,8 +36,8 @@ const Controls = ({ controls, onControlChange }) => {
         >
           <Typography>{control.name}</Typography>
           <Switch 
-            checked={control.state} 
-            onChange={(e) => onControlChange(control.name, e.target.checked)} 
+             checked={control.state} 
+             onChange={(e) => onControlChange(control.id, e.target.checked)} 
           />
         </Box>
       ))}

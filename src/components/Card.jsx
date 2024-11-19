@@ -53,10 +53,10 @@ const ValueName = styled(Typography)`
 `
 
 const Value = styled(Typography)`
-    font-size: 8rem;
+    font-size: 5rem;
 `
 
-const Card = ({icon: Icon, value, valueName, bg}) => {
+const Card = ({icon: Icon, value, valueName, bg, unit}) => {
     const theme = useTheme();
 
     return (
@@ -65,7 +65,7 @@ const Card = ({icon: Icon, value, valueName, bg}) => {
                 {Icon && <Icon />}
             </IconSection>
             <ValueSection>
-                <Value sx={{fontSize: {xs: '4.8rem',sm: '8rem'}}} fontWeight={600}>{value}</Value>
+                <Value sx={{fontSize: {xs: '4.8rem',sm: '6rem'}}} fontWeight={600}>{value}{unit}</Value>
                 <ValueName sx={{fontSize: {xs: '1.6rem',sm: '2.4rem'}}}>{valueName}</ValueName>
             </ValueSection>
         </Wrapper>
