@@ -37,9 +37,10 @@ class MockMqttService {
         }
       ],
       controls: [
-        { id: 'pump1', name: 'Water Pump', state: false },
-        { id: 'light1', name: 'Grow Light', state: true },
-        { id: 'fan1', name: 'Ventilation', state: false }
+        { id: 'sprinkler1', name: 'Sprinkler System', state: false },
+        { id: 'fan1', name: 'Ventilation Fan', state: false },
+        { id: 'blinds1', name: 'Window Blinds', state: false },
+        { id: 'window1', name: 'Window Tilt', state: false }
       ],
       logs: [
         'System started',
@@ -145,7 +146,6 @@ class MockMqttService {
       
       // Update sensor with new value
       randomSensor.value = newValue;
-      console.log(randomSensor)
       this.publishMessage(`plantiminder/sensors/${randomSensor.id}`, randomSensor);
 
       // Occasionally generate a log

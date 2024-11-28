@@ -70,14 +70,14 @@ const Header = () => {
         }}>
       <StyledToolbar>
         <StyledLogoLink to="/">
-          <img src={logo} alt="Plantiminder Logo" height="40" />
+          <img src={logo} alt="Plantminder Logo" height="40" />
           <Typography 
   sx={{ 
     fontSize: { xs: '2rem', md: '3.2rem' }  
   }} 
   fontWeight="bold"
 > 
-            PLANTIMINDER
+            PLANTMINDER
           </Typography>
         </StyledLogoLink>
 

@@ -26,9 +26,9 @@ const Logo = styled.img`
 const Loader = () => {
   return (
     <LoaderWrapper>
-      <Logo src={logo} alt="Plantiminder Logo" />
+      <Logo src={logo} alt="Plantminder Logo" />
       <Typography variant="h4" fontWeight="bold">
-        PLANTIMINDER
+        PLANTMINDER
       </Typography>
       <CircularProgress 
         size={60} 

@@ -16,6 +16,8 @@ const ControlsWrapper = styled(Box)`
 `;
 
 const Controls = ({ controls, onControlChange }) => {
+  console.log(controls);
+  
   const theme = useTheme();
 
   return (
@@ -37,7 +39,7 @@ const Controls = ({ controls, onControlChange }) => {
           <Typography>{control.name}</Typography>
           <Switch 
              checked={control.state} 
-             onChange={(e) => onControlChange(control.id, e.target.checked)} 
+             onChange={(e) => onControlChange(control.id, control,e.target.checked)} 
           />
         </Box>
       ))}

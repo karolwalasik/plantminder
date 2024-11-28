@@ -30,15 +30,16 @@ export const useMqttData = () => {
       setIsConnected(true);
       
       // Subscribe to all relevant topics
-      mqttClient.subscribe('plantiminder/sensors/#');
-      mqttClient.subscribe('plantiminder/controls/#');
-      mqttClient.subscribe('plantiminder/logs/#');
+      
+      mqttClient.subscribe('plantminder/sensors/#');
+      mqttClient.subscribe('plantminder/controls/#');
+      mqttClient.subscribe('plantminder/logs/#');
     });
 
     mqttClient.on('message', (topic, message) => {
       const payload = JSON.parse(message.toString());
       
-      if (topic.startsWith('plantiminder/sensors/')) {
+      if (topic.startsWith('plantminder/sensors/')) {
         setSensors(prev => {
           const newSensors = [...prev];
           const sensorIndex = newSensors.findIndex(s => s.id === payload.id);
@@ -53,7 +54,7 @@ export const useMqttData = () => {
         });
       }
       
-      if (topic.startsWith('plantiminder/controls/')) {
+      if (topic.startsWith('plantminder/controls/')) {
         setControls(prev => {
           const newControls = [...prev];
           const controlIndex = newControls.findIndex(c => c.id === payload.id);
@@ -68,7 +69,7 @@ export const useMqttData = () => {
         });
       }
       
-      if (topic.startsWith('plantiminder/logs/')) {
+      if (topic.startsWith('plantminder/logs/')) {
         setLogs(prev => [payload, ...prev].slice(0, 20)); // Keep last 20 logs
       }
 
@@ -83,10 +84,11 @@ export const useMqttData = () => {
     };
   }, []);
 
-  const publishControl = (controlId, state) => {
+  const publishControl = (controlId,control, state) => {
     if (client && isConnected) {
         //set state to control
-      client.publish(`plantiminder/controls/${controlId}/set`, JSON.stringify({ state }));
+        
+      client.publish(`plantminder/controls/${controlId}/set`, JSON.stringify({ ...control,state }));
     }
   };
 

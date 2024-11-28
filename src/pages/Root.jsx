@@ -7,6 +7,7 @@ import Controls from '../components/Controls';
 import { mockData } from '../helpers/mockData';
 import Loader from '../components/Loader';
 import {useMockMqttData} from '../hooks/useMockMqttData';
+import { useMqttData } from "../hooks/useMqttData";
 
 const DashboardWrapper = styled(Container)(({ theme }) => ({
   display: "flex",
@@ -24,24 +25,25 @@ export default function Root() {
   // const [controls, setControls] = useState(mockData.controls);
   // const [isLoading, setIsLoading] = useState(true);
 
-   const { 
+//    const { 
+//     isLoading, 
+//     sensors, 
+//     controls, 
+//     logs, 
+//     publishControl 
+//   } = useMockMqttData();
+
+  const { 
     isLoading, 
     sensors, 
     controls, 
     logs, 
     publishControl 
-  } = useMockMqttData();
+  } = useMqttData();
 
-  // const { 
-  //   isLoading, 
-  //   sensors, 
-  //   controls, 
-  //   logs, 
-  //   publishControl 
-  // } = useMqttData();
-
-  const handleControlChange = (name, state) => {
-    publishControl(name, state);
+  const handleControlChange = (name,control, state) => {
+    console.log(name,state)
+    publishControl(name, control,state);
   };
 
   // useEffect(() => {
