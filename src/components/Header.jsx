@@ -1,10 +1,12 @@
-import { AppBar, Toolbar, Typography, IconButton, Box, Menu, MenuItem, Avatar } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, IconButton, Box, Menu, MenuItem, Avatar } from '@mui/material';
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import styled from 'styled-components';
 import logo from '../assets/logo192.png'; // Make sure to add your logo
 import { COLORS } from '../constants/COLORS';
+import { useUser } from './UserContext';
+import { logOut } from '../services/firebaseService';
 
 
 const StyledToolbar = styled(Toolbar)`
@@ -43,8 +45,19 @@ const StyledLink = styled(Link)`
 
 
 const Header = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const location = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -83,19 +96,33 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <NavLinks>
-          <StyledLink to="/" $active={isActive('/') || isActive('/dashboard')}>
-            <Typography>Dashboard</Typography>
-          </StyledLink>
-          <StyledLink to="/weather" $active={isActive('/weather')}>
-            <Typography>Weather</Typography>
-          </StyledLink>
-          <StyledLink to="/profile" $active={isActive('/profile')}>
-            <Avatar 
-              sx={{ width: 40, height: 40 }}
-              alt="Profile"
-              src="/path-to-profile-image.jpg" // Add your profile image path
-            />
-          </StyledLink>
+        {user && (
+            <>
+              <StyledLink to="/" $active={location.pathname === '/'}>
+                <Typography>Dashboard</Typography>
+              </StyledLink>
+              <StyledLink to="/weather" $active={location.pathname === '/weather'}>
+                <Typography>Weather</Typography>
+              </StyledLink>
+              <StyledLink to="/profile" $active={location.pathname === '/profile'}>
+                <Typography>Profile</Typography>
+              </StyledLink>
+              <Button 
+                onClick={handleLogout}
+                variant="outlined"
+                sx={{ 
+                  color: COLORS.BLACK,
+                  borderColor: COLORS.BLACK,
+                  '&:hover': {
+                    borderColor: COLORS.PRIMARY_DARK,
+                    color: COLORS.PRIMARY_DARK
+                  }
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          )}
         </NavLinks>
 
         {/* Mobile Navigation */}
@@ -131,12 +158,22 @@ const Header = () => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={handleClose} component={Link} to="/">
-              Dashboard
-            </MenuItem>
-            <MenuItem onClick={handleClose} component={Link} to="/weather">
-              Weather
-            </MenuItem>
+            {user && (
+            <>
+              <MenuItem onClick={() => { navigate('/'); setAnchorEl(null); }}>
+                Dashboard
+              </MenuItem>
+              <MenuItem onClick={() => { navigate('/weather'); setAnchorEl(null); }}>
+                Weather
+              </MenuItem>
+              <MenuItem onClick={() => { navigate('/profile'); setAnchorEl(null); }}>
+                Profile
+              </MenuItem>
+              <MenuItem onClick={() => { handleLogout(); setAnchorEl(null); }}>
+                Logout
+              </MenuItem>
+            </>
+          )}
           </Menu>
         </Box>
       </StyledToolbar>

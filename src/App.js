@@ -1,6 +1,7 @@
 import Router from "./components/Router"
 import Header from "./components/Header"
 import styled from "styled-components";
+import { UserProvider } from './components/UserContext';
 
 const AppWrapper = styled.div`
   min-height: 100vh;
@@ -8,13 +9,17 @@ const AppWrapper = styled.div`
 `;
 
 function App() {
+
+  
   return (
+    <UserProvider>
     <div className="App">
       <Header />
       <AppWrapper>
         <Router/>
       </AppWrapper>
     </div>
+    </UserProvider>
   );
 }
 
