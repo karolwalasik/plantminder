@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import AutomationLogs from '../components/AutomationLogs';
 import CardsGrid from '../components/CardsGrid';
 import Controls from '../components/Controls';
-import { mockData } from '../helpers/mockData';
+// import { mockData } from '../helpers/mockData';
 import Loader from '../components/Loader';
 import {useMockMqttData} from '../hooks/useMockMqttData';
-import { useMqttData } from "../hooks/useMqttData";
+// import { useMqttData } from "../hooks/useMqttData";
 
 const DashboardWrapper = styled(Container)(({ theme }) => ({
   display: "flex",

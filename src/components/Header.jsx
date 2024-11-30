@@ -58,10 +58,6 @@ const Header = () => {
       console.error('Logout failed:', error);
     }
   };
-
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
   
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
