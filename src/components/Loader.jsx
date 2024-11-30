@@ -1,6 +1,6 @@
 import { Box, CircularProgress, Typography } from '@mui/material';
 import styled from 'styled-components';
-import logo from '../assets/logo192.png'; 
+import logo from '../assets/logo_hq.png'; 
 import { COLORS } from '../constants/COLORS';
 
 const LoaderWrapper = styled(Box)`
