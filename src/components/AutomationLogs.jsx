@@ -16,33 +16,14 @@ const MAX_LOGS = 20; // Maximum number of logs to store
 
 const AutomationLogs = ({ logs }) => {
   const [logHistory, setLogHistory] = useState(() => {
-    // Initialize from localStorage on component mount
     const saved = localStorage.getItem('automationLogs');
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
     if (logs && logs.length > 0) {
-      // Add timestamp to new logs
-      const newLogs = logs.map(log => ({
-        message: log,
-        timestamp: new Date().toISOString()
-      }));
-
-      // Combine new logs with existing ones, remove duplicates, and limit the total
-      setLogHistory(prevLogs => {
-        const combined = [...newLogs, ...prevLogs];
-        const unique = Array.from(new Map(
-          combined.map(log => [log.message, log])
-        ).values());
-        
-        const limited = unique.slice(0, MAX_LOGS);
-        
-        // Save to localStorage
-        localStorage.setItem('automationLogs', JSON.stringify(limited));
-        
-        return limited;
-      });
+      setLogHistory(logs);
+      localStorage.setItem('automationLogs', JSON.stringify(logs));
     }
   }, [logs]);
 
@@ -63,7 +44,9 @@ const AutomationLogs = ({ logs }) => {
         <StyledBox2>
           {logHistory.map((log, index) => (
             <Typography key={index} sx={{ mb: 0.5 }}>
-              {new Date(log.timestamp).toLocaleString()} - {log.message}
+              {new Date(log.timestamp).toLocaleString()} - {log.details}
+              {log.devices && ` (Devices: ${log.devices.join(', ')})`}
+              {log.action && ` [${log.action}]`}
             </Typography>
           ))}
         </StyledBox2>

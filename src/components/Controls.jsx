@@ -16,7 +16,9 @@ const ControlsWrapper = styled(Box)`
 `;
 
 const Controls = ({ controls, onControlChange }) => {
-  console.log(controls);
+
+  console.log("C",controls);
+  
   
   const theme = useTheme();
 

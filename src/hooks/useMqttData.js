@@ -39,7 +39,7 @@ export const useMqttData = () => {
     mqttClient.on('message', (topic, message) => {
       const payload = JSON.parse(message.toString());
       
-      if (topic.startsWith('plantminder/sensors/')) {
+      if (topic.startsWith('plantminder/sensors')) {
         setSensors(prev => {
           const newSensors = [...prev];
           const sensorIndex = newSensors.findIndex(s => s.id === payload.id);
@@ -54,7 +54,9 @@ export const useMqttData = () => {
         });
       }
       
-      if (topic.startsWith('plantminder/controls/')) {
+      if (topic.startsWith('plantminder/controls')) {
+        console.log('payload', payload);
+        
         setControls(prev => {
           const newControls = [...prev];
           const controlIndex = newControls.findIndex(c => c.id === payload.id);
@@ -69,8 +71,13 @@ export const useMqttData = () => {
         });
       }
       
-      if (topic.startsWith('plantminder/logs/')) {
-        setLogs(prev => [payload, ...prev].slice(0, 20)); // Keep last 20 logs
+      if (topic.startsWith('plantminder/logs')) {
+        console.log('payload', payload);
+        const logWithTimestamp = {
+          ...payload,
+          timestamp: new Date().toISOString()
+        };
+        setLogs(prev => [logWithTimestamp, ...prev].slice(0, 20)); // Keep last 20 logs
       }
 
       // If we have at least one piece of data, we can stop loading
@@ -87,6 +94,7 @@ export const useMqttData = () => {
   const publishControl = (controlId,control, state) => {
     if (client && isConnected) {
         //set state to control
+        console.log('control', control,state);
         
       client.publish(`plantminder/controls/${controlId}/set`, JSON.stringify({ ...control,state }));
     }
