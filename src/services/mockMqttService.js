@@ -1,6 +1,35 @@
 class MockMqttService {
   constructor() {
     this.subscribers = new Map();
+
+    const initialLogs = [
+      {
+        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        details: "Temperature exceeded 24°C. Fan activated.",
+        devices: ["fan1"],
+        action: "Turn on"
+      },
+      {
+        timestamp: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+        details: "Humidity below 50%. Sprinklers activated.",
+        devices: ["sprinkler1"],
+        action: "Turn on"
+      },
+      {
+        timestamp: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+        details: "Light intensity above 1000 lux. Blinds closed.",
+        devices: ["blinds1"],
+        action: "Turn on"
+      }
+    ];
+
+    const controlStates = new Map();
+    initialLogs.forEach(log => {
+    log.devices.forEach(deviceId => {
+      controlStates.set(deviceId, log.action === "Turn on");
+    });
+    });
+
     this.mockData = {
       sensors: [
         { 
@@ -37,17 +66,12 @@ class MockMqttService {
         }
       ],
       controls: [
-        { id: 'sprinkler1', name: 'Sprinkler System', state: false },
-        { id: 'fan1', name: 'Ventilation Fan', state: false },
-        { id: 'blinds1', name: 'Window Blinds', state: false },
-        { id: 'window1', name: 'Window Tilt', state: false }
+        { id: 'sprinkler1', name: 'Sprinkler System', state: controlStates.get('sprinkler1') || false },
+        { id: 'fan1', name: 'Ventilation Fan', state: controlStates.get('fan1') || false },
+        { id: 'blinds1', name: 'Window Blinds', state: controlStates.get('blinds1') || false },
+        { id: 'window1', name: 'Window Tilt', state: controlStates.get('window1') || false }
       ],
-      logs: [
-        'System started',
-        'Humidity check completed',
-        'Water pump activated',
-        'Light cycle started'
-      ]
+      logs: initialLogs
     };
   }
 
@@ -71,8 +95,8 @@ class MockMqttService {
         console.log(`Published to ${topic}:`, message);
         if (topic.includes('/controls/') && topic.includes('/set')) {
           const controlId = topic.split('/')[2];
-          const newState = JSON.parse(message).state;
-          this.updateControlState(controlId, newState);
+          const payload = JSON.parse(message);
+          this.updateControlState(controlId, payload.state);
         }
       },
       end: () => {
@@ -81,11 +105,18 @@ class MockMqttService {
       }
     };
   }
+  
 
   updateControlState(controlId, newState) {
     const controlIndex = this.mockData.controls.findIndex(c => c.id === controlId);
     if (controlIndex !== -1) {
-      this.mockData.controls[controlIndex].state = newState;
+      const control = this.mockData.controls[controlIndex];
+      
+      // Update the control state
+      this.mockData.controls[controlIndex] = {
+        ...control,
+        state: newState
+      };
       
       // Publish the updated control state
       this.publishMessage(
@@ -93,14 +124,21 @@ class MockMqttService {
         this.mockData.controls[controlIndex]
       );
       
-      // Generate a log entry
+      // Generate a proper log entry
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        details: `${control.name} manually ${newState ? 'activated' : 'deactivated'}`,
+        devices: [controlId],
+        action: newState ? 'Turn on' : 'Turn off'
+      };
+  
+      // Publish the log
       this.publishMessage(
-        'plantiminder/logs/control',
-        `${this.mockData.controls[controlIndex].name} turned ${newState ? 'on' : 'off'}`
+        'plantiminder/logs/system',
+        logEntry
       );
     }
   }
-
   publishMessage(topic, payload) {
     const callback = this.subscribers.get('message');
     if (callback) {
@@ -113,53 +151,125 @@ class MockMqttService {
     this.mockData.sensors.forEach(sensor => {
       this.publishMessage(`plantiminder/sensors/${sensor.id}`, sensor);
     });
-
+  
     this.mockData.controls.forEach(control => {
       this.publishMessage(`plantiminder/controls/${control.id}`, control);
     });
-
+  
     this.mockData.logs.forEach(log => {
       this.publishMessage('plantiminder/logs/system', log);
     });
-
+  
     // Set up periodic updates
-    
     this.updateInterval = setInterval(() => {
-      // Update random sensor
       const randomSensor = this.mockData.sensors[Math.floor(Math.random() * this.mockData.sensors.length)];
       
-      // Ensure we have valid current value and maxValue
       let currentValue = Number(randomSensor.value) || 0;
       const maxValue = Number(randomSensor.maxValue) || 100;
-      
-      // Calculate variation (5% of max value)
       const variation = (Math.random() - 0.5) * 2 * (maxValue * 0.05);
-      
-      // Calculate new value
-      let newValue = currentValue + variation;
-      
-      // Ensure value stays within bounds
-      newValue = Math.max(0, Math.min(maxValue, newValue));
-      
-      // Round to nearest integer
+      let newValue = Math.max(0, Math.min(maxValue, currentValue + variation));
       newValue = Math.round(newValue);
       
-      // Update sensor with new value
       randomSensor.value = newValue;
       this.publishMessage(`plantiminder/sensors/${randomSensor.id}`, randomSensor);
-
-      // Occasionally generate a log
-      if (Math.random() < 0.3) {
-        const logMessages = [
-          'Routine check completed',
-          'Sensor readings normal',
-          'System health: OK',
-          'Environmental conditions stable'
-        ];
-        const randomLog = logMessages[Math.floor(Math.random() * logMessages.length)];
-        this.publishMessage('plantiminder/logs/system', randomLog);
+  
+      // if (Math.random() < 0.3) {
+        let automationAction;
+        const currentControls = new Map(this.mockData.controls.map(c => [c.id, c.state]));
+        
+        switch(randomSensor.type) {
+          case 'temperature':
+            if (newValue >= 24 && !currentControls.get('fan1')) {
+              automationAction = {
+                details: "Temperature exceeded 24°C. Fan activated.",
+                devices: ["fan1"],
+                controlUpdates: [{ id: 'fan1', name: 'Ventilation Fan', state: true }]
+              };
+            } else if (newValue < 24 && currentControls.get('fan1')) {
+              automationAction = {
+                details: "Temperature below 24°C. Fan deactivated.",
+                devices: ["fan1"],
+                controlUpdates: [{ id: 'fan1', name: 'Ventilation Fan', state: false }]
+              };
+            }
+            break;
+  
+          case 'humidity':
+            if (newValue < 50 && !currentControls.get('sprinkler1')) {
+              automationAction = {
+                details: "Humidity below 50%. Sprinklers activated.",
+                devices: ["sprinkler1"],
+                controlUpdates: [{ id: 'sprinkler1', name: 'Sprinkler System', state: true }]
+              };
+            } else if (newValue > 80 && currentControls.get('sprinkler1')) {
+              automationAction = {
+                details: "Humidity above 80%. Sprinklers deactivated.",
+                devices: ["sprinkler1"],
+                controlUpdates: [{ id: 'sprinkler1', name: 'Sprinkler System', state: false }]
+              };
+            }
+            break;
+  
+          case 'light':
+            if (newValue > 1000 && !currentControls.get('blinds1')) {
+              automationAction = {
+                details: "Light intensity above 1000 lux. Blinds closed.",
+                devices: ["blinds1"],
+                controlUpdates: [{ id: 'blinds1', name: 'Window Blinds', state: true }]
+              };
+            } else if (newValue < 300 && currentControls.get('blinds1')) {
+              automationAction = {
+                details: "Light intensity below 300 lux. Blinds opened.",
+                devices: ["blinds1"],
+                controlUpdates: [{ id: 'blinds1', name: 'Window Blinds', state: false }]
+              };
+            }
+            break;
+  
+          case 'moisture':
+            if (newValue < 30 && !currentControls.get('sprinkler1')) {
+              automationAction = {
+                details: "Soil moisture below 30%. Watering system activated.",
+                devices: ["sprinkler1"],
+                controlUpdates: [{ id: 'sprinkler1', name: 'Sprinkler System', state: true }]
+              };
+            } else if (newValue > 60 && currentControls.get('sprinkler1')) {
+              automationAction = {
+                details: "Soil moisture above 60%. Watering system deactivated.",
+                devices: ["sprinkler1"],
+                controlUpdates: [{ id: 'sprinkler1', name: 'Sprinkler System', state: false }]
+              };
+            }
+            break;
+        }
+    
+  
+        if (automationAction) {
+          // Create and publish log entry
+          const logEntry = {
+            ...automationAction,
+            timestamp: new Date().toISOString(),
+            action: automationAction.controlUpdates[0].state ? 'Turn on' : 'Turn off'
+          };
+          this.publishMessage('plantiminder/logs/system', logEntry);
+  
+          // Update and publish control states
+          automationAction.controlUpdates.forEach(update => {
+            const controlIndex = this.mockData.controls.findIndex(c => c.id === update.id);
+            if (controlIndex !== -1) {
+              this.mockData.controls[controlIndex] = {
+                ...this.mockData.controls[controlIndex],
+                state: update.state
+              };
+              this.publishMessage(
+                `plantiminder/controls/${update.id}`,
+                this.mockData.controls[controlIndex]
+              );
+            }
+          });
+        // }
       }
-    }, 5000);
+    }, 1000);
   }
   stopMockDataUpdates() {
     if (this.updateInterval) {

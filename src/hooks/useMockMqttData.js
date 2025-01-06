@@ -72,9 +72,16 @@ export const useMockMqttData = () => {
     };
   }, []);
 
-  const publishControl = (controlId, state) => {
+  const publishControl = (controlId, control, state) => {
     if (client && isConnected) {
-      client.publish(`plantiminder/controls/${controlId}/set`, JSON.stringify({ state }));
+      client.publish(
+        `plantiminder/controls/${controlId}/set`, 
+        JSON.stringify({
+          id: controlId,
+          name: control.name,
+          state: state
+        })
+      );
     }
   };
 

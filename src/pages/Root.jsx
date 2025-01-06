@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import AutomationLogs from '../components/AutomationLogs';
 import CardsGrid from '../components/CardsGrid';
 import Controls from '../components/Controls';
-// import { mockData } from '../helpers/mockData';
+import { mockData } from '../helpers/mockData';
 import Loader from '../components/Loader';
 import {useMockMqttData} from '../hooks/useMockMqttData';
-// import { useMqttData } from "../hooks/useMqttData";
+import { useMqttData } from "../hooks/useMqttData";
 
 const DashboardWrapper = styled(Container)(({ theme }) => ({
   display: "flex",
@@ -20,46 +20,46 @@ const DashboardWrapper = styled(Container)(({ theme }) => ({
 }));
 
 export default function Root() {
-//   const [logs] = useState(mockData.logs);
-//   const [sensors] = useState(mockData.sensors);
-//   const [controls, setControls] = useState(mockData.controls);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [logs] = useState(mockData.logs);
+  // const [sensors] = useState(mockData.sensors);
+  // const [controls, setControls] = useState(mockData.controls);
+  // const [isLoading, setIsLoading] = useState(true);
 
    const { 
-    // isLoading, 
+    isLoading, 
     sensors, 
     controls, 
     logs, 
     publishControl 
   } = useMockMqttData();
 
-//   const { 
-//     isLoading, 
-//     sensors, 
-//     controls, 
-//     logs, 
-//     publishControl 
-//   } = useMqttData();
+  // const { 
+  //   isLoading, 
+  //   sensors, 
+  //   controls, 
+  //   logs, 
+  //   publishControl 
+  // } = useMqttData();
 
   const handleControlChange = (name,control, state) => {
-    console.log(name,state)
+    if(name)
     publishControl(name, control,state);
   };
 
-  useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+  // useEffect(() => {
+  //   // Simulate loading time
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 1000);
 
-    return () => clearTimeout(timer);
-  }, []);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
-//   const handleControlChange = (name, state) => {
-//     setControls(controls.map(control => 
-//       control.name === name ? { ...control, state } : control
-//     ));
-//   };
+  // const handleControlChange = (name, state) => {
+  //   setControls(controls.map(control => 
+  //     control.name === name ? { ...control, state } : control
+  //   ));
+  // };
 
   if (isLoading) {
     return <Loader />;
