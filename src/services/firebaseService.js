@@ -12,6 +12,9 @@ import {
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -81,6 +84,32 @@ export const signIn = async (email, password) => {
       await updatePassword(user, newPassword);
     } catch (error) {
       console.error('Error changing password:', error);
+      throw error;
+    }
+  };
+
+
+  export const db = getFirestore(app);
+  export const saveSensorHistory = async (sensorId, value) => {
+    try {
+      await addDoc(collection(db, `sensors/${sensorId}/history`), {
+        value: value,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error saving sensor history:", error);
+      throw error;
+    }
+  };
+  
+  export const saveAutomationLog = async (logEntry) => {
+    try {
+      await addDoc(collection(db, 'automation_logs'), {
+        ...logEntry,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error saving automation log:", error);
       throw error;
     }
   };

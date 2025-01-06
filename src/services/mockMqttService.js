@@ -1,6 +1,12 @@
+
+import { saveSensorHistory, saveAutomationLog } from './firebaseService';
+
 class MockMqttService {
   constructor() {
     this.subscribers = new Map();
+
+
+    
 
     const initialLogs = [
       {
@@ -146,6 +152,8 @@ class MockMqttService {
     }
   }
 
+  
+
   startMockDataUpdates() {
     // Initial data publish
     this.mockData.sensors.forEach(sensor => {
@@ -159,9 +167,11 @@ class MockMqttService {
     this.mockData.logs.forEach(log => {
       this.publishMessage('plantiminder/logs/system', log);
     });
+
+    
   
     // Set up periodic updates
-    this.updateInterval = setInterval(() => {
+    this.updateInterval = setInterval(async () => {
       const randomSensor = this.mockData.sensors[Math.floor(Math.random() * this.mockData.sensors.length)];
       
       let currentValue = Number(randomSensor.value) || 0;
@@ -172,7 +182,10 @@ class MockMqttService {
       
       randomSensor.value = newValue;
       this.publishMessage(`plantiminder/sensors/${randomSensor.id}`, randomSensor);
-  
+      if(saveSensorHistory){
+        await saveSensorHistory(randomSensor.id, newValue);
+      } 
+    
       // if (Math.random() < 0.3) {
         let automationAction;
         const currentControls = new Map(this.mockData.controls.map(c => [c.id, c.state]));
@@ -252,6 +265,7 @@ class MockMqttService {
             action: automationAction.controlUpdates[0].state ? 'Turn on' : 'Turn off'
           };
           this.publishMessage('plantiminder/logs/system', logEntry);
+          await saveAutomationLog(logEntry);
   
           // Update and publish control states
           automationAction.controlUpdates.forEach(update => {
@@ -269,7 +283,7 @@ class MockMqttService {
           });
         // }
       }
-    }, 1000);
+    }, 5000);
   }
   stopMockDataUpdates() {
     if (this.updateInterval) {

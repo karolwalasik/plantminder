@@ -97,6 +97,9 @@ const Header = () => {
               <StyledLink to="/" $active={location.pathname === '/'}>
                 <Typography>Dashboard</Typography>
               </StyledLink>
+              <StyledLink to="/history" $active={location.pathname === '/history'}>
+                <Typography>History</Typography>
+              </StyledLink>
               <StyledLink to="/weather" $active={location.pathname === '/weather'}>
                 <Typography>Weather</Typography>
               </StyledLink>
@@ -158,6 +161,9 @@ const Header = () => {
             <>
               <MenuItem onClick={() => { navigate('/'); setAnchorEl(null); }}>
                 Dashboard
+              </MenuItem>
+              <MenuItem onClick={() => { navigate('/history'); setAnchorEl(null); }}>
+                History
               </MenuItem>
               <MenuItem onClick={() => { navigate('/weather'); setAnchorEl(null); }}>
                 Weather
