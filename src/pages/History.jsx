@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Tabs, Tab, Paper } from '@mui/material';
+import { Box, Typography, Tabs, Tab, Paper, TextField } from '@mui/material';
 import styled from 'styled-components';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '../services/firebaseService'
+import { collection, query, orderBy, where, getDocs } from 'firebase/firestore';
+import { db } from '../services/firebaseService';
 import { LineChart } from '@mui/x-charts/LineChart';
 
 const StyledBox = styled(Box)`
@@ -17,6 +17,10 @@ const ChartContainer = styled(Paper)`
   height: 400px;
 `;
 
+const DatePickerContainer = styled(Box)`
+  margin: 20px 0;
+`;
+
 const TabPanel = ({ children, value, index }) => (
   <div hidden={value !== index} style={{ marginTop: '20px' }}>
     {value === index && children}
@@ -25,6 +29,7 @@ const TabPanel = ({ children, value, index }) => (
 
 const History = () => {
     const [tabValue, setTabValue] = useState(0);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [sensorHistory, setSensorHistory] = useState({
       temperature: [],
       humidity: [],
@@ -40,6 +45,13 @@ const History = () => {
         try {
           setIsLoading(true);
           setError(null);
+
+          // Create start and end of selected date
+          const startDate = new Date(selectedDate);
+          startDate.setHours(0, 0, 0, 0);
+          const endDate = new Date(selectedDate);
+          endDate.setHours(23, 59, 59, 999);
+
           // Fetch sensor history
           const sensors = ['temp1', 'hum1', 'light1', 'moist1'];
           const newSensorHistory = { ...sensorHistory };
@@ -47,13 +59,17 @@ const History = () => {
           for (const sensor of sensors) {
             try {
               const sensorRef = collection(db, `sensors/${sensor}/history`);
-              const q = query(sensorRef, orderBy('timestamp', 'desc'), limit(100));
+              const q = query(
+                sensorRef,
+                where('timestamp', '>=', startDate),
+                where('timestamp', '<=', endDate),
+                orderBy('timestamp', 'asc')
+              );
               const snapshot = await getDocs(q);
               
               const data = snapshot.docs
                 .map(doc => {
                   const timestamp = doc.data().timestamp;
-                  // Check if timestamp exists and is valid
                   if (!timestamp) return null;
                   
                   return {
@@ -61,8 +77,7 @@ const History = () => {
                     value: doc.data().value || 0
                   };
                 })
-                .filter(item => item !== null) // Remove any null entries
-                .sort((a, b) => a.timestamp - b.timestamp);
+                .filter(item => item !== null);
     
               switch(sensor) {
                 case 'temp1':
@@ -82,14 +97,18 @@ const History = () => {
               }
             } catch (error) {
               console.error(`Error fetching ${sensor} history:`, error);
-              // Continue with other sensors even if one fails
             }
           }
           setSensorHistory(newSensorHistory);
     
           // Fetch automation history
           const automationRef = collection(db, 'automation_logs');
-          const automationQuery = query(automationRef, orderBy('timestamp', 'desc'), limit(100));
+          const automationQuery = query(
+            automationRef,
+            where('timestamp', '>=', startDate),
+            where('timestamp', '<=', endDate),
+            orderBy('timestamp', 'desc')
+          );
           const automationSnapshot = await getDocs(automationQuery);
           
           const automationData = automationSnapshot.docs
@@ -115,21 +134,21 @@ const History = () => {
       };
     
       fetchHistory();
-    }, []);
+    }, [selectedDate]); // Refetch when date changes
 
     const renderSensorChart = (data, title, unit) => {
       if (!data || data.length === 0) {
         return (
           <ChartContainer>
             <Typography variant="h6" gutterBottom>{title}</Typography>
-            <Typography color="text.secondary">No data available</Typography>
+            <Typography color="text.secondary">No data available for selected date</Typography>
           </ChartContainer>
         );
       }
 
       try {
         const xAxisData = data
-          .filter(d => d && d.timestamp) // Ensure timestamp exists
+          .filter(d => d && d.timestamp)
           .map(d => d.timestamp.getTime());
         const yAxisData = data
           .filter(d => d && typeof d.value !== 'undefined')
@@ -139,7 +158,7 @@ const History = () => {
           return (
             <ChartContainer>
               <Typography variant="h6" gutterBottom>{title}</Typography>
-              <Typography color="text.secondary">Insufficient data for chart</Typography>
+              <Typography color="text.secondary">Insufficient data for selected date</Typography>
             </ChartContainer>
           );
         }
@@ -183,56 +202,60 @@ const History = () => {
       }
     };
 
-    if (isLoading) {
-      return (
-        <StyledBox>
-          <Typography>Loading history data...</Typography>
-        </StyledBox>
-      );
-    }
-
-    if (error) {
-      return (
-        <StyledBox>
-          <Typography color="error">{error}</Typography>
-        </StyledBox>
-      );
-    }
-
     return (
       <StyledBox>
         <Typography variant="h4" gutterBottom>History</Typography>
         
-        <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
-          <Tab label="Sensor History" />
-          <Tab label="Automation History" />
-        </Tabs>
+        <DatePickerContainer>
+          <TextField
+            type="date"
+            label="Select Date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </DatePickerContainer>
 
-        <TabPanel value={tabValue} index={0}>
-          {renderSensorChart(sensorHistory.temperature, 'Temperature History', '°C')}
-          {renderSensorChart(sensorHistory.humidity, 'Humidity History', '%')}
-          {renderSensorChart(sensorHistory.light, 'Light History', 'lux')}
-          {renderSensorChart(sensorHistory.moisture, 'Moisture History', '%')}
-        </TabPanel>
+        {isLoading ? (
+          <Typography>Loading history data...</Typography>
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
+        ) : (
+          <>
+            <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
+              <Tab label="Sensor History" />
+              <Tab label="Automation History" />
+            </Tabs>
 
-        <TabPanel value={tabValue} index={1}>
-          <Paper sx={{ p: 2 }}>
-            {automationHistory.length > 0 ? (
-              automationHistory.map((log) => (
-                <Box key={log.id} sx={{ mb: 2, p: 2, borderBottom: '1px solid #eee' }}>
-                  <Typography variant="body1">
-                    {log.timestamp?.toLocaleString()} - {log.details}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Devices: {log.devices?.join(', ') || 'None'} | Action: {log.action}
-                  </Typography>
-                </Box>
-              ))
-            ) : (
-              <Typography color="text.secondary">No automation history available</Typography>
-            )}
-          </Paper>
-        </TabPanel>
+            <TabPanel value={tabValue} index={0}>
+              {renderSensorChart(sensorHistory.temperature, 'Temperature History', '°C')}
+              {renderSensorChart(sensorHistory.humidity, 'Humidity History', '%')}
+              {renderSensorChart(sensorHistory.light, 'Light History', 'lux')}
+              {renderSensorChart(sensorHistory.moisture, 'Moisture History', '%')}
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={1}>
+              <Paper sx={{ p: 2 }}>
+                {automationHistory.length > 0 ? (
+                  automationHistory.map((log) => (
+                    <Box key={log.id} sx={{ mb: 2, p: 2, borderBottom: '1px solid #eee' }}>
+                      <Typography variant="body1">
+                        {log.timestamp?.toLocaleString()} - {log.details}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Devices: {log.devices?.join(', ') || 'None'} | Action: {log.action}
+                      </Typography>
+                    </Box>
+                  ))
+                ) : (
+                  <Typography color="text.secondary">No automation history available for selected date</Typography>
+                )}
+              </Paper>
+            </TabPanel>
+          </>
+        )}
       </StyledBox>
     );
 };
